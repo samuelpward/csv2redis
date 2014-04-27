@@ -13,7 +13,7 @@ fn main() {
   let fp = &Path::new(args[1]);
   let mut rdr = csv::Decoder::from_file(fp);
   rdr.has_headers(true);
-  
+
   //  Start redis-cli --pipe
   let mut child = match Process::new("redis-cli", ["--pipe".to_owned()]) {
     Ok(child) => child,
@@ -21,10 +21,10 @@ fn main() {
   };
 
   //  stdin pipe for redis-cli
-  let mut pipe = PipeStream::open(child.stdin.get_ref());
-    
+  let pipe = child.stdin.get_mut_ref();
+
   for (date, open, high, low, close, volume, adj) in rdr.decode_iter::<(~str, f32, f32, f32, f32, uint, f32)>() {
-      pipe.write_line("SET {} {}", date, close);
+      pipe.write_line(format!("SET {} {}", date, close));
     }
 
 }
