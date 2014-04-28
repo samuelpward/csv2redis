@@ -4,6 +4,7 @@ use std::path::Path;
 use std::os;
 use std::io::Process;
 use std::io::pipe::PipeStream;
+use std::str::Chars;
 
 
 fn main() {
@@ -22,9 +23,10 @@ fn main() {
 
   //  stdin pipe for redis-cli
   let pipe = child.stdin.get_mut_ref();
-
+  let cmd = "SET";
+  
   for (date, open, high, low, close, volume, adj) in rdr.decode_iter::<(~str, f32, f32, f32, f32, uint, f32)>() {
-      pipe.write_line(format!("SET {} {}", date, close));
-    }
+    pipe.write_line(format!("*3\r\n$3\r\nSET\r\n${}\r\n{}\r\n${}\r\n{}\r", date.len(), date, close.to_str().len(), close));
+    }  
 
 }
